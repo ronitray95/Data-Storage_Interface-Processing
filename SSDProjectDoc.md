@@ -4,7 +4,7 @@
 
 | Name            | Roll No.   | Github ID                  |
 |-----------------|------------|----------------------------|
-| Rani Tresa Gigi |            | github.com/ranitresa98     |
+| Rani Tresa Gigi | 2020202019 | github.com/ranitresa98     |
 | Ronit Ray       | 2020201024 | github.com/ronitray95      |
 | Akashdeep Singh | 2020201051 | github.com/Akashdeepsingh98|
 
