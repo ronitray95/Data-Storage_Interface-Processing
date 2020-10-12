@@ -32,6 +32,20 @@
 
 ## Relevant Study Material
 
+Some Python libraries to consult:
+
+- [`papis`](https://pypi.org/project/papis/)
+- [`cobib`](https://pypi.org/project/cobib/)
+- [`pybtex`](https://pybtex.org/) - A BibTeX-compatible bibliography processor in Python.
+- [`physbiblio`](https://pypi.org/project/physbiblio/)
+- [`CITeX`](https://pypi.org/project/CITeX/)
+- Something like `RefManageR` for Python.
+
+Other resources:
+
+- <https://bibolamazi.readthedocs.io/en/latest/devel-filter-easy/>
+- <https://www.kai-arzheimer.com/filtering-bibtex-files-bibtool>
+
 ## Milestones for us
 
 1. Developing the front end API for user.
