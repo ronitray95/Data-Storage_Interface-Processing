@@ -12,20 +12,12 @@ client.connect(function (err) {
     console.log("Connected successfully to server");
 
     const db = client.db(dbName);
-    //insertDocuments(db, function () {
-    //    updateDocument(db, function () {
-    //        removeDocument(db, function () {
-    //            client.close();
-    //        });
-    //    });
-    //});
-    //insertDocuments(db, function () {
     findDocuments(db, function () {
         removeDocument(db, function () {
             client.close();
         });
     });
-    //});
+
 });
 
 const insertDocuments = function (db, callback) {
