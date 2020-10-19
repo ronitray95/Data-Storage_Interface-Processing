@@ -4,8 +4,12 @@
   "description": "parse bibtex, storeage",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node index.js",
+    "createdb": "node createDb.js"
   },
   "author": "Akashdeep",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "bibtex-parse": "^2.1.0"
+  }
 }
