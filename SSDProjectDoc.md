@@ -32,7 +32,7 @@
 
 ## Relevant Study Material
 
-### Some Python libraries to consult:
+### Some Python libraries to consult
 
 - [`papis`](https://pypi.org/project/papis/)
 - [`cobib`](https://pypi.org/project/cobib/)
@@ -41,11 +41,11 @@
 - [`CITeX`](https://pypi.org/project/CITeX/)
 - Something like `RefManageR` for Python.
 
-### Other resources:
+### Other resources
 
 - <https://bibolamazi.readthedocs.io/en/latest/devel-filter-easy/>
 - <https://www.kai-arzheimer.com/filtering-bibtex-files-bibtool>
-- Melville, P., Mooney, R.J., Nagarajan, R.: Content-boosted collaborative filtering for Improved recommendations. 
+- Melville, P., Mooney, R.J., Nagarajan, R.: Content-boosted collaborative filtering for Improved recommendations.
 - Herlocker, J.L., Konstan, J.A., Terveen, L.G., Riedl, J.T.: Evaluating collaborative filtering recommender systems
 - Adomavicius, G., Tuzhilin, A.: Toward the next generation of recommender systems: a survey of the state-of-the-art and possible extensions
 - Amine Naak, Hicham Hage, Esma Aïmeur :Papyres: A Research Paper Management System
