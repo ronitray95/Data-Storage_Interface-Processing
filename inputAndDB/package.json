@@ -10,6 +10,7 @@
   "author": "Akashdeep",
   "license": "ISC",
   "dependencies": {
-    "bibtex-parse": "^2.1.0"
+    "bibtex-parse": "^2.1.0",
+    "mongodb": "^3.6.2"
   }
 }
