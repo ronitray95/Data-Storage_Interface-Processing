@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
 
 import bibtexparser as btp
 from bibtexparser.bparser import BibTexParser as parseOpts
 from pymongo import MongoClient, errors
-
+from flask import request, redirect, Response, Flask,render_template
+app = Flask(__name__, template_folder='./')
 
 parser = parseOpts(common_strings=True)
 # dbuser=admin, pass=admin123
@@ -31,3 +31,19 @@ bibTexDB = db['bibTex']
 bibTexDB.insert_many(bib_database.entries)
 
 client.close()
+
+
+@app.route('/giveData', methods=['POST'])
+def giveData():
+    data = request.form['data']
+    print('The data is: '+data)
+    return render_template('index.html')
+
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+
+if __name__ == "__main__":
+    app.run()
