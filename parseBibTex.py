@@ -32,12 +32,15 @@ def giveData():
         db = client["testDB"]
         bibTexDB = db['bibTex']
 
-        # gonna delete everything then insert
-        x = bibTexDB.delete_many({})
-        print(x.deleted_count, " docs deleted")
-
-        y = bibTexDB.insert_many(bib_database.entries)
-        print(len(y.inserted_ids), " docs inserted")
+        for i in range(len(bib_database.entries)):
+            if 'doi' in bib_database.entries[i].keys():
+                primkey = bib_database.entries[i].pop('doi')
+            else:
+                primkey = bib_database.entries[i].pop('ID')
+            bibTexDB.update_one({'_id': primkey},
+                                {'$set': bib_database.entries[i]},
+                                upsert=True)
+        print(str(bibTexDB.count_documents({})) + ' docs present')
 
         client.close()
     return redirect(url_for('index'))
