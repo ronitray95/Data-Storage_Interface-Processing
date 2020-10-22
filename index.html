@@ -1,17 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+       
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-<head>
-    <title>
-        SSD 37
-    </title>
-</head>
-
-<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker.css" rel="stylesheet"/>
+  
+  
+    <title>SSD 37</title>
+   
+   
+  </head>  
+  <body>
+  	<div class="container mt-5">
     <form action="" method="POST" enctype="multipart/form-data">
-        <p><input type="file" name="file"></p>
-        <p><input type="submit" value="Submit"></p>
+ 
+ 	<p>Choose file:</p>
+<div class="custom-file mb-3 w-50">
+    <input type="file" class="custom-file-input" id="bibtex_files"
+    name="file">
+    <label class="custom-file-label" for="bibtex_files">Choose file</label>
+  </div>
+  <div class="form-group w-50">
+  <label for="title" class="form-text ">Title:</label>
+  <input type="text" class="form-control" id="title" >
+   </div>
+  <div class="form-group w-50">
+  <label for="author" class="form-text ">Author:</label>
+  <input type="text" class="form-control" id="author" >
+  </div>
+
+   <div class="form-row w-50">
+    <div class="col ml-2">
+  <label for="year_start" class="form-text ">Starting year:</label>
+  <input type="text"  id="year_start" >
+</div>
+ <div class="col ml-2">
+  <label for="year_end" class="form-text ">End year:</label>
+  <input type="text"  id="year_end" >
+</div>
+  </div>
+
+  <br>
+  <br>
+     
+  <button type="submit" class="btn btn-dark btn-lg mt-2" value="Submit">Submit</button>
     </form>
+</div>
+
+<script>
+$(document).ready(function(){
+
+$(".custom-file-input").on("change", function() {
+  
+ var filename=$(this).val();
+  var index = filename.lastIndexOf("\\");
+   filename=filename.substr(index+1);
+  $(this).siblings(".custom-file-label").addClass("selected").html(filename);
+});
+
+
+
+
+
+
+ $('#year_start').datepicker({
+	startDate:'2000',
+  defaultDate: '2000',
+    endDate:'new Date()',
+   format: 'yyyy',
+  viewMode: "years", 
+   minViewMode: "years"
+          
+}).on('changeDate',function(dt){
+    $("#year_end").data('datepicker').setStartDate(dt.date);
+});
+
+
+ $('#year_end').datepicker({
+  startDate:'2000',
+  defaultDate: 'new Date()',
+  endDate:'new Date()',
+ format: 'yyyy',
+  viewMode: "years", 
+   minViewMode: "years"
+        
+}).on('changeDate',function(dt){
+    $("#year_start").data('datepicker').setEndDate(dt.date);
+});
+
+ });
+</script>
 </body>
 
 </html>
+
