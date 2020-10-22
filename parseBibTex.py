@@ -45,7 +45,12 @@ def giveData():
         print(str(bibTexDB.count_documents({})) + ' docs present')
 
         client.close()
+    title=request.form.get('title')
+    if title !='':
+        print(title)
+
     return redirect(url_for('index'))
+    
 
 
 if __name__ == "__main__":
