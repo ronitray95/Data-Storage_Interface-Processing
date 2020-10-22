@@ -4,7 +4,7 @@ from bibtexparser.bparser import BibTexParser as parseOpts
 from pymongo import MongoClient, errors
 from flask import request, redirect, Response, Flask, render_template, url_for
 from werkzeug.utils import secure_filename
-
+import re
 app = Flask(__name__, template_folder='./')
 
 
@@ -44,10 +44,19 @@ def giveData():
                                 upsert=True)
         print(str(bibTexDB.count_documents({})) + ' docs present')
 
+        
+
+
+        author_name=request.form.get('author')
+        if author_name !='':
+        
+            myquery = { "author": re.compile(  ".*"+re.escape(author_name)+".*", re.IGNORECASE ) }
+            author_list=bibTexDB.find(myquery)
+            for author_list_el in author_list:
+                print(author_list_el)
+
+            
         client.close()
-    title=request.form.get('title')
-    if title !='':
-        print(title)
 
     return redirect(url_for('index'))
     
