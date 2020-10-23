@@ -53,8 +53,7 @@ def giveData():
 
     title_=request.form.get('title')
     if title_ !='':
-        myquery_str ="""{'title':re.compile('.*"""+re.escape(title_)+""".*',re.IGNORECASE)}"""
-        # myquery_str =""" {'title':{"$regex": ".*"""+re.escape(title_)+""".*', re.IGNORECASE ) }"""
+        myquery_str ="""{'title':re.compile('.*"""+re.escape(title_)+""".*',re.IGNORECASE)}"""        
         myquery.update(eval(myquery_str))
 
     author_name=request.form.get('author')
