@@ -63,14 +63,14 @@ def giveData():
         myquery_str="""{'author':re.compile('.*"""+re.escape(author_name)+""".*',re.IGNORECASE)}"""
         myquery.update(eval(myquery_str))
 
-    # year_start=request.form.get('year_start')
-    # if year_start =='':
-    #     year_start=2000
-    # year_end=request.form.get('year_end')
-    # if year_end =='':
-    #     year_end=datetime.datetime.now().year
-    # myquery_str="""{'year':{"$lte":"""+str(year_end)+""","$gte":"""+str(year_start)+"""}}"""
-    # myquery.update(eval(myquery_str))
+    year_start=request.form.get('year_start')
+    if year_start =='':
+        year_start=2000
+    year_end=request.form.get('year_end')
+    if year_end =='':
+        year_end=datetime.datetime.now().year
+    myquery_str="""{'year':{"$lte":"""+str(year_end)+""","$gte":"""+str(year_start)+"""}}"""
+    myquery.update(eval(myquery_str))
         
     print(myquery)    
     short_list=bibTexDB.find(myquery)

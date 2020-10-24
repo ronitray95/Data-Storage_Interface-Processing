@@ -48,8 +48,7 @@ def giveData():
 
         
 
-    myquery={}
-        
+    myquery={}     
 
     title_=request.form.get('title')
     if title_ !='':
@@ -57,9 +56,18 @@ def giveData():
         myquery.update(eval(myquery_str))
 
     author_name=request.form.get('author')
-    if author_name !='':
-        
+    if author_name !='':        
         myquery_str="""{'author':re.compile('.*"""+re.escape(author_name)+""".*',re.IGNORECASE)}"""
+        myquery.update(eval(myquery_str))
+
+    keywords_=request.form.get('keywords')
+    if keywords_ !='':        
+        myquery_str="""{'keywords':re.compile('.*"""+re.escape(keywords_)+""".*',re.IGNORECASE)}"""
+        myquery.update(eval(myquery_str))
+
+    abstract_=request.form.get('abstract')
+    if abstract_ !='':        
+        myquery_str="""{'abstract':re.compile('.*"""+re.escape(abstract_)+""".*',re.IGNORECASE)}"""
         myquery.update(eval(myquery_str))
 
     # year_start=request.form.get('year_start')
