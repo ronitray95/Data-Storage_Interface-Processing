@@ -2,10 +2,12 @@
 import bibtexparser as btp
 from bibtexparser.bparser import BibTexParser as parseOpts
 from pymongo import MongoClient, errors
-from flask import request, redirect, Response, Flask, render_template, url_for
+from flask import request, redirect, Response, Flask, render_template, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 import re
 import datetime
+import os
+import json
 app = Flask(__name__, template_folder='./')
 
 
@@ -45,6 +47,8 @@ def giveData():
                                 upsert=True)
         print(str(bibTexDB.count_documents({})) + ' docs present')
 
+        #os.remove(os.path.join('./', uploaded_file.filename))
+
     myquery = {}
 
     title_ = request.form.get('title')
@@ -71,23 +75,28 @@ def giveData():
             re.escape(abstract_)+""".*',re.IGNORECASE)}"""
         myquery.update(eval(myquery_str))
 
-    year_start=request.form.get('year_start')
-    if year_start =='':
-        year_start=2000
-    year_end=request.form.get('year_end')
-    if year_end =='':
-        year_end=datetime.datetime.now().year
-    myquery_str="""{'year':{"$lte":'"""+str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
+    year_start = request.form.get('year_start')
+    if year_start == '':
+        year_start = 2000
+    year_end = request.form.get('year_end')
+    if year_end == '':
+        year_end = datetime.datetime.now().year
+    myquery_str = """{'year':{"$lte":'""" + \
+        str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
     myquery.update(eval(myquery_str))
 
     print(myquery)
-    short_list = bibTexDB.find(myquery)
-    for short_list_el in short_list:
-        print(short_list_el)
-
+    short_list = list(bibTexDB.find(myquery))
+    #for short_list_el in short_list:
+    #    print(short_list_el)
     client.close()
 
-    return redirect(url_for('index'))
+    with open('youroutput.txt', 'w') as f:
+        for line in short_list:
+            f.write(str(line))
+            f.write('\n')
+
+    return send_from_directory('./', 'youroutput.txt', as_attachment=True)
 
 
 if __name__ == "__main__":
