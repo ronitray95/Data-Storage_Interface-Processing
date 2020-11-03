@@ -1,3 +1,4 @@
 bibtexparser
 pymongo
 dnspython
+flask

@@ -50,53 +50,64 @@ def giveData():
         #os.remove(os.path.join('./', uploaded_file.filename))
 
     myquery = {}
-
+    querying = False
     title_ = request.form.get('title')
     if title_ != '':
+        querying = True
         myquery_str = """{'title':re.compile('.*""" + \
             re.escape(title_)+""".*',re.IGNORECASE)}"""
         myquery.update(eval(myquery_str))
 
     author_name = request.form.get('author')
     if author_name != '':
+        querying = True
         myquery_str = """{'author':re.compile('.*""" + \
             re.escape(author_name)+""".*',re.IGNORECASE)}"""
         myquery.update(eval(myquery_str))
 
     keywords_ = request.form.get('keywords')
     if keywords_ != '':
+        querying = True
         myquery_str = """{'keywords':re.compile('.*""" + \
             re.escape(keywords_)+""".*',re.IGNORECASE)}"""
         myquery.update(eval(myquery_str))
 
     abstract_ = request.form.get('abstract')
     if abstract_ != '':
+        querying = True
         myquery_str = """{'abstract':re.compile('.*""" + \
             re.escape(abstract_)+""".*',re.IGNORECASE)}"""
         myquery.update(eval(myquery_str))
 
+    # check for year
     year_start = request.form.get('year_start')
     if year_start == '':
         year_start = 2000
     year_end = request.form.get('year_end')
     if year_end == '':
         year_end = datetime.datetime.now().year
-    myquery_str = """{'year':{"$lte":'""" + \
-        str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
-    myquery.update(eval(myquery_str))
+    if year_start != '' or year_end != '':
+        querying = True
+        myquery_str = """{'year':{"$lte":'""" + \
+            str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
+        myquery.update(eval(myquery_str))
 
-    print(myquery)
-    short_list = list(bibTexDB.find(myquery))
-    #for short_list_el in short_list:
-    #    print(short_list_el)
-    client.close()
+    if querying==True:
+        print(myquery)
+        short_list = list(bibTexDB.find(myquery))
+        client.close()
 
-    with open('youroutput.txt', 'w') as f:
-        for line in short_list:
-            f.write(str(line))
-            f.write('\n')
+        # write result to file
+        with open('youroutput.txt', 'w', encoding="utf-8") as f:
+            for line in short_list:
+                f.write(str(line))
+                f.write('\n')
 
-    return send_from_directory('./', 'youroutput.txt', as_attachment=True)
+    # send the file with resultant bibtex back to user
+    if querying:
+        return send_from_directory('./', 'youroutput.txt', as_attachment=True)
+    else:
+        return render_template('index.html')
 
 
 if __name__ == "__main__":
