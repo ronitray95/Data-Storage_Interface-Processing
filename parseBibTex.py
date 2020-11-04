@@ -8,6 +8,7 @@ import re
 import datetime
 import os
 import json
+import zipfile
 app = Flask(__name__, template_folder='./')
 
 
@@ -47,7 +48,7 @@ def giveData():
                                 upsert=True)
         print(str(bibTexDB.count_documents({})) + ' docs present')
 
-        #os.remove(os.path.join('./', uploaded_file.filename))
+        # os.remove(os.path.join('./', uploaded_file.filename))
 
     myquery = {}
     querying = False
@@ -92,22 +93,78 @@ def giveData():
             str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
         myquery.update(eval(myquery_str))
 
-    if querying==True:
-        print(myquery)
-        short_list = list(bibTexDB.find(myquery))
-        client.close()
+    excluded = ''
+    content = ''
 
-        # write result to file
-        with open('youroutput.txt', 'w', encoding="utf-8") as f:
-            for line in short_list:
-                f.write(str(line))
-                f.write('\n')
+    for x in bibTexDB.find({}):
+        excluding = False
+        # if title_ != '' and x['title'] != title_:
+        #    excluded += '\n' + str(x) + '\n' + 'Title not matching\n'
+
+        print(list(x.keys()))
+
+        if title_ != '':
+            if title_ != x['title']:
+                excluded += '\n' + str(x) + '\n' + 'Title not matching\n'
+                excluding = True
+                continue
+
+        if author_name != '':
+            if author_name not in x['author']:
+                excluded += '\n' + str(x) + '\n' + 'Author name not matching\n'
+                excluding = True
+                continue
+
+        if x['year'] < year_start or x['year'] > year_end:
+            excluded += '\n' + str(x) + '\n' + 'Not in given date range\n'
+            excluding = True
+            continue
+
+        if abstract_ != '':
+            if abstract_ not in x['abstract']:
+                excluded += '\n' + str(x) + '\n' + 'not matching abstract\n'
+                excluding = True
+                continue
+
+        if keywords_ != '':
+            #print(x['doi'])
+            temp = keywords_.strip().split(';')
+            for kw in temp:
+                if 'keywords' in x.keys() and kw.lower() not in x['keywords'].lower():
+                    excluding = True
+                    excluded += '\n' + str(x) + '\n' + 'keyword not matching\n'
+
+        if excluding == False:
+            content += str(x) + '\n\n'
+
+    with open('included.txt', 'w', encoding='utf-8') as f:
+        f.write(content)
+
+    with open('excluded.txt', 'w', encoding='utf-8') as f:
+        f.write(excluded)
+
+    zipf = zipfile.ZipFile('Output.zip', 'w', zipfile.ZIP_DEFLATED)
+    zipf.write('included.txt')
+    zipf.write('excluded.txt')
+    zipf.close()
+
+    return send_from_directory('./', 'Output.zip', as_attachment=True)
+    # if querying == True:
+    #    print(myquery)
+    #    short_list = list(bibTexDB.find(myquery))
+    #    client.close()
+#
+    #    # write result to file
+    #    with open('youroutput.txt', 'w', encoding="utf-8") as f:
+    #        for line in short_list:
+    #            f.write(str(line))
+    #            f.write('\n')
 
     # send the file with resultant bibtex back to user
-    if querying:
-        return send_from_directory('./', 'youroutput.txt', as_attachment=True)
-    else:
-        return render_template('index.html')
+    # if querying:
+    #    return send_from_directory('./', 'youroutput.txt', as_attachment=True)
+    # else:
+    #    return render_template('index.html')
 
 
 if __name__ == "__main__":
