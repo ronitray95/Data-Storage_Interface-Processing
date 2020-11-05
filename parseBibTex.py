@@ -95,47 +95,54 @@ def giveData():
 
     excluded = ''
     content = ''
-
+    list_urls=[]
     for x in bibTexDB.find({}):
         excluding = False
         # if title_ != '' and x['title'] != title_:
         #    excluded += '\n' + str(x) + '\n' + 'Title not matching\n'
 
-        print(list(x.keys()))
+        # print(list(x.keys()))
 
         if title_ != '':
-            if title_ != x['title']:
+            patt=re.compile('.*'+re.escape(title_)+'.*',re.IGNORECASE)
+            if patt.search(x['title'])==None:
                 excluded += '\n' + str(x) + '\n' + 'Title not matching\n'
                 excluding = True
                 continue
 
         if author_name != '':
-            if author_name not in x['author']:
+            patt=re.compile('.*'+re.escape(author_name)+'.*',re.IGNORECASE)
+            
+            if patt.search(x['author'])==None:
                 excluded += '\n' + str(x) + '\n' + 'Author name not matching\n'
                 excluding = True
                 continue
 
-        if x['year'] < year_start or x['year'] > year_end:
+        if int(x['year']) < int(year_start) or int(x['year']) > int(year_end):
             excluded += '\n' + str(x) + '\n' + 'Not in given date range\n'
             excluding = True
             continue
 
         if abstract_ != '':
-            if abstract_ not in x['abstract']:
+            patt=re.compile('.*'+re.escape(abstract_)+'.*',re.IGNORECASE)
+            if patt.search(x['abstract'])==None:
                 excluded += '\n' + str(x) + '\n' + 'not matching abstract\n'
                 excluding = True
                 continue
 
         if keywords_ != '':
             #print(x['doi'])
+            patt=re.compile('.*'+re.escape(keywords_)+'.*',re.IGNORECASE)
             temp = keywords_.strip().split(';')
             for kw in temp:
-                if 'keywords' in x.keys() and kw.lower() not in x['keywords'].lower():
+                if 'keywords' in x.keys() and patt.search(x['keywords'])==None:
                     excluding = True
                     excluded += '\n' + str(x) + '\n' + 'keyword not matching\n'
 
         if excluding == False:
             content += str(x) + '\n\n'
+            
+            # print(x.get('url'))
 
     with open('included.txt', 'w', encoding='utf-8') as f:
         f.write(content)
@@ -149,22 +156,22 @@ def giveData():
     zipf.close()
 
     return send_from_directory('./', 'Output.zip', as_attachment=True)
-    # if querying == True:
-    #    print(myquery)
-    #    short_list = list(bibTexDB.find(myquery))
-    #    client.close()
-#
-    #    # write result to file
-    #    with open('youroutput.txt', 'w', encoding="utf-8") as f:
-    #        for line in short_list:
-    #            f.write(str(line))
-    #            f.write('\n')
+    # if querying==True:
+    #     print(myquery)
+    #     short_list = list(bibTexDB.find(myquery))
+    #     client.close()
 
-    # send the file with resultant bibtex back to user
+    #     # write result to file
+    #     with open('youroutput.txt', 'w', encoding="utf-8") as f:
+    #         for line in short_list:
+    #             f.write(str(line))
+    #             f.write('\n')
+
+    # # send the file with resultant bibtex back to user
     # if querying:
-    #    return send_from_directory('./', 'youroutput.txt', as_attachment=True)
+    #     return send_from_directory('./', 'youroutput.txt', as_attachment=True)
     # else:
-    #    return render_template('index.html')
+    #     return render_template('index.html')
 
 
 if __name__ == "__main__":
