@@ -20,9 +20,9 @@ import sys
 import codecs
 
 
-def index(request):
-    if request.method == 'GET':
-        return render(request, 'index.html')
+# def index(request):
+#     if request.method == 'GET':
+#         return render(request, 'index.html')
 
 
 def processFile(request):
@@ -159,7 +159,7 @@ def processFile(request):
                 content += str(x) + '\n\n'
 
                 # print(x.get('url'))
-        
+
         with open('included.txt', 'w', encoding='utf-8', errors='replace') as f:
             f.write(content)
 
@@ -170,6 +170,7 @@ def processFile(request):
         zipf.write('included.txt')
         zipf.write('excluded.txt')
         zipf.close()
-
         # send_from_directory('./', 'Output.zip', as_attachment=True)
-        return FileResponse(open('./Output.zip'), as_attachment=True, filename='Output.zip')
+        return FileResponse(open('Output.zip','rb'), as_attachment=True, filename='Output.zip')
+    elif request.method == 'GET':
+        return render(request, 'index.html')
