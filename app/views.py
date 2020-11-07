@@ -30,7 +30,7 @@ def processFile(request):
         parser = parseOpts(common_strings=True)
         client = MongoClient(
             "mongodb+srv://admin:admin123@cluster0.ajwby.mongodb.net/testDB?retryWrites=true&w=majority")
-        uploaded_file = request.FILES['file']
+        uploaded_file = request.POST.get('file', '')
         try:
             client.server_info()
             print("server_info():", "OK")
@@ -40,9 +40,9 @@ def processFile(request):
 
         db = client["testDB"]
         bibTexDB = db['bibTex']
-        if uploaded_file.name != '':
+        if uploaded_file != '':
             # uploaded_file.save(secure_filename(uploaded_file.name))
-            x = secure_filename(uploaded_file.name)
+            x = secure_filename(uploaded_file)
             x = default_storage.save(x, ContentFile(uploaded_file.read()))
             with open(x, encoding='utf-8') as bibtex_file:
                 bib_database = parser.parse_file(
@@ -61,7 +61,6 @@ def processFile(request):
             # os.remove(os.path.join('./', uploaded_file.filename))
 
         myquery = {}
-        querying = False
         title_ = request.POST.get('title')
         if title_ != '':
             querying = True
@@ -105,7 +104,6 @@ def processFile(request):
 
         excluded = ''
         content = ''
-        list_urls = []
         for x in bibTexDB.find({}):
             excluding = False
             # if title_ != '' and x['title'] != title_:
@@ -171,6 +169,8 @@ def processFile(request):
         zipf.write('excluded.txt')
         zipf.close()
         # send_from_directory('./', 'Output.zip', as_attachment=True)
-        return FileResponse(open('Output.zip','rb'), as_attachment=True, filename='Output.zip')
+        context = {'bibtex': bibTexDB.find({})}
+        return render(request, 'assess.html', context)
+        #return FileResponse(open('Output.zip','rb'), as_attachment=True, filename='Output.zip')
     elif request.method == 'GET':
         return render(request, 'index.html')
