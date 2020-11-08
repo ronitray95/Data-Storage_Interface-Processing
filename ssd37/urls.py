@@ -22,7 +22,7 @@ import app.views
 urlpatterns = [
     path('admin/', admin.site.urls),
     #url(r'^$', TemplateView.as_view(template_name='index.html'),name='home'),
-    url(r'^$', app.views.processFile,name='home'),
-    #url(r'post$',app.views.processFile,name='processFile'),
-    
+    url(r'^$', app.views.processFile, name='home'),
+    # url(r'post$',app.views.processFile,name='processFile'),
+    path('assess/', app.views.assess)
 ]

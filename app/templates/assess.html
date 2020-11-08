@@ -23,9 +23,21 @@
 
 <body>
 
+    <form action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
+        <button type="submit" class="btn btn-dark btn-lg mt-2" value="Submit" id="submit">Download excluded</button>
+    </form>
     <ul>
         {% for abib in bibtex %}
-            <li><p>{{abib}}</p></li>
+        <li>
+            <p>{{abib}}</p>
+        </li>
+        <ol>
+            <li>
+                Are the goals of the experiment clear
+                <input type="checkbox" name="q1yes" value="Yes" class="form-control">Yes
+                <input type="checkbox" name="q1no" value="No" class="form-control"><label for="q1no">No</label>
+            </li>
+        </ol>
         {% endfor %}
     </ul>
 

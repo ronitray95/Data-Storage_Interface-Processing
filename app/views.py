@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.shortcuts import render
+from django.shortcuts import redirect
 from django.template import RequestContext
 from django.http import FileResponse
 from django.core.files.storage import default_storage
@@ -24,8 +25,10 @@ import codecs
 #     if request.method == 'GET':
 #         return render(request, 'index.html')
 
+context = {}
 
 def processFile(request):
+    global context
     if request.method == 'POST':
         parser = parseOpts(common_strings=True)
         client = MongoClient(
@@ -60,48 +63,48 @@ def processFile(request):
 
             # os.remove(os.path.join('./', uploaded_file.filename))
 
-        myquery = {}
+        #myquery = {}
         title_ = request.POST.get('title')
-        if title_ != '':
-            querying = True
-            myquery_str = """{'title':re.compile('.*""" + \
-                re.escape(title_)+""".*',re.IGNORECASE)}"""
-            myquery.update(eval(myquery_str))
-
+        #if title_ != '':
+        #    querying = True
+        #    myquery_str = """{'title':re.compile('.*""" + \
+        #        re.escape(title_)+""".*',re.IGNORECASE)}"""
+        #    myquery.update(eval(myquery_str))
+#
         author_name = request.POST.get('author')
-        if author_name != '':
-            querying = True
-            myquery_str = """{'author':re.compile('.*""" + \
-                re.escape(author_name)+""".*',re.IGNORECASE)}"""
-            myquery.update(eval(myquery_str))
-
+        #if author_name != '':
+        #    querying = True
+        #    myquery_str = """{'author':re.compile('.*""" + \
+        #        re.escape(author_name)+""".*',re.IGNORECASE)}"""
+        #    myquery.update(eval(myquery_str))
+#
         keywords_ = request.POST.get('keywords')
-        if keywords_ != '':
-            querying = True
-            myquery_str = """{'keywords':re.compile('.*""" + \
-                re.escape(keywords_)+""".*',re.IGNORECASE)}"""
-            myquery.update(eval(myquery_str))
-
+        #if keywords_ != '':
+        #    querying = True
+        #    myquery_str = """{'keywords':re.compile('.*""" + \
+        #        re.escape(keywords_)+""".*',re.IGNORECASE)}"""
+        #    myquery.update(eval(myquery_str))
+#
         abstract_ = request.POST.get('abstract')
-        if abstract_ != '':
-            querying = True
-            myquery_str = """{'abstract':re.compile('.*""" + \
-                re.escape(abstract_)+""".*',re.IGNORECASE)}"""
-            myquery.update(eval(myquery_str))
-
-        # check for year
+        #if abstract_ != '':
+        #    querying = True
+        #    myquery_str = """{'abstract':re.compile('.*""" + \
+        #        re.escape(abstract_)+""".*',re.IGNORECASE)}"""
+        #    myquery.update(eval(myquery_str))
+#
+        ## check for year
         year_start = request.POST.get('year_start')
         if year_start == '':
             year_start = 2000
         year_end = request.POST.get('year_end')
         if year_end == '':
             year_end = datetime.datetime.now().year
-        if year_start != '' or year_end != '':
-            querying = True
-            myquery_str = """{'year':{"$lte":'""" + \
-                str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
-            myquery.update(eval(myquery_str))
-
+        #if year_start != '' or year_end != '':
+        #    querying = True
+        #    myquery_str = """{'year':{"$lte":'""" + \
+        #        str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
+        #    myquery.update(eval(myquery_str))
+#
         excluded = ''
         content = ''
         for x in bibTexDB.find({}):
@@ -156,8 +159,6 @@ def processFile(request):
             if excluding == False:
                 content += str(x) + '\n\n'
 
-                # print(x.get('url'))
-
         with open('included.txt', 'w', encoding='utf-8', errors='replace') as f:
             f.write(content)
 
@@ -170,7 +171,14 @@ def processFile(request):
         zipf.close()
         # send_from_directory('./', 'Output.zip', as_attachment=True)
         context = {'bibtex': bibTexDB.find({})}
-        return render(request, 'assess.html', context)
+        #return render(request, 'assess.html', context)
+        return redirect('/assess')
         #return FileResponse(open('Output.zip','rb'), as_attachment=True, filename='Output.zip')
     elif request.method == 'GET':
         return render(request, 'index.html')
+
+
+def assess(request):
+    if request.method == 'POST':
+        return FileResponse(open('Output.zip','rb'), as_attachment=True, filename='Output.zip')
+    return render(request, 'assess.html', context)
