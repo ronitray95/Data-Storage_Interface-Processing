@@ -1,8 +1,7 @@
 from django.shortcuts import render
 
 # Create your views here.
-from django.shortcuts import render
-from django.shortcuts import redirect
+from django.shortcuts import render,redirect
 from django.template import RequestContext
 from django.http import FileResponse
 from django.core.files.storage import default_storage
