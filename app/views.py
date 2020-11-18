@@ -106,6 +106,8 @@ def processFile(request):
         #        str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
         #    myquery.update(eval(myquery_str))
 #
+        language_ = request.POST.get('language')
+        publisher_ = request.POST.get('publisher')
         excluded = ''
         content = ''
         for x in bibTexDB.find({}):
@@ -142,7 +144,7 @@ def processFile(request):
                     '.*'+re.escape(abstract_)+'.*', re.IGNORECASE)
                 if patt.search(x['abstract']) == None:
                     excluded += '\n' + str(x) + '\n' + \
-                        'not matching abstract\n'
+                        'Abstract not matching\n'
                     excluding = True
                     continue
 
@@ -155,7 +157,40 @@ def processFile(request):
                     if 'keywords' in x.keys() and patt.search(x['keywords']) == None:
                         excluding = True
                         excluded += '\n' + \
-                            str(x) + '\n' + 'keyword not matching\n'
+                            str(x) + '\n' + 'Keyword not matching\n'
+                        continue
+
+            if language_ != '':
+                # patt = re.compile(
+                #    '.*'+re.escape(language_)+'.*', re.IGNORECASE)
+                if 'language' in x.keys():
+                    # if patt.search(x['language']) != language_:
+                    if language_ in x['language']:
+                        excluding = True
+                        excluded += '\n' + \
+                            str(x) + '\n' + 'Language not matching\n'
+                        continue
+
+            if publisher_ != '':
+                # patt = re.compile(
+                #    '.*'+re.escape(publisher_)+'.*', re.IGNORECASE)
+                flag1 = False
+                flag2 = False
+                # if 'publisher' in x.keys() and patt.search(x['publisher']) == publisher_:
+                if 'publisher' in x.keys() and publisher_ in x['publisher']:
+                    # print(x['publisher'])
+                    flag1 = True
+                # if 'booktitle' in x.keys() and patt.search(x['booktitle']) == publisher_:
+                if 'booktitle' in x.keys() and publisher_ in x['booktitle']:
+                    # print(x['booktitle'])
+                    flag2 = True
+                if flag1 == True or flag2 == True:
+                    pass
+                else:
+                    excluding = True
+                    excluded += '\n' + \
+                        str(x) + '\n' + 'Publisher not matching\n'
+                    continue
 
             if excluding == False:
                 content += str(x) + '\n\n'
