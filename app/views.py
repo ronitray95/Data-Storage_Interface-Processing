@@ -106,6 +106,7 @@ def processFile(request):
         #        str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
         #    myquery.update(eval(myquery_str))
 #
+        zipf = zipfile.ZipFile('Output.zip', 'w', zipfile.ZIP_DEFLATED)
         language_ = request.POST.get('language')
         publisher_ = request.POST.get('publisher')
         excluded = ''
@@ -153,7 +154,7 @@ def processFile(request):
                 patt = re.compile(
                     '.*'+re.escape(keywords_)+'.*', re.IGNORECASE)
                 temp = keywords_.strip().split(';')
-                for kw in temp:
+                for _ in temp:
                     if 'keywords' in x.keys() and patt.search(x['keywords']) == None:
                         excluding = True
                         excluded += '\n' + \
@@ -194,6 +195,17 @@ def processFile(request):
 
             if excluding == False:
                 content += str(x) + '\n\n'
+                url = 'https://scholar.google.com/scholar?lookup=0&q=' + str(x['_id'])
+                page = requests.get(url)
+                sp = bs(page.content, "html.parser")
+                sp = sp.findAll("div", class_="gs_or_ggsm")
+                for s in sp:
+                    pdd = s.find('a')['href']
+                    response = requests.get(pdd)
+                    with open(x['_id']+'.pdf', 'wb') as f:
+                        f.write(response.content)
+                        zipf.write(x['_id']+'.pdf')
+
 
         with open('included.txt', 'w', encoding='utf-8', errors='replace') as f:
             f.write(content)
@@ -201,7 +213,7 @@ def processFile(request):
         with open('excluded.txt', 'w', encoding='utf-8', errors='replace') as f:
             f.write(excluded)
 
-        zipf = zipfile.ZipFile('Output.zip', 'w', zipfile.ZIP_DEFLATED)
+        
         zipf.write('included.txt')
         zipf.write('excluded.txt')
         zipf.close()
