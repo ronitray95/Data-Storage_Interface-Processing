@@ -64,34 +64,43 @@ def processFile(request):
 
             # os.remove(os.path.join('./', uploaded_file.filename))
 
-        #myquery = {}
+        myquery = {}
         title_ = request.POST.get('title')
-        # if title_ != '':
-        #    querying = True
-        #    myquery_str = """{'title':re.compile('.*""" + \
-        #        re.escape(title_)+""".*',re.IGNORECASE)}"""
-        #    myquery.update(eval(myquery_str))
-#
+        if title_ != '':
+          
+           myquery_str = """{'title':re.compile('.*""" + \
+               re.escape(title_)+""".*',re.IGNORECASE)}"""
+           myquery.update(eval(myquery_str))
+
         author_name = request.POST.get('author')
-        # if author_name != '':
-        #    querying = True
-        #    myquery_str = """{'author':re.compile('.*""" + \
-        #        re.escape(author_name)+""".*',re.IGNORECASE)}"""
-        #    myquery.update(eval(myquery_str))
-#
+        if author_name != '':
+           
+           myquery_str = """{'author':re.compile('.*""" + \
+               re.escape(author_name)+""".*',re.IGNORECASE)}"""
+           myquery.update(eval(myquery_str))
+
         keywords_ = request.POST.get('keywords')
-        # if keywords_ != '':
-        #    querying = True
-        #    myquery_str = """{'keywords':re.compile('.*""" + \
-        #        re.escape(keywords_)+""".*',re.IGNORECASE)}"""
-        #    myquery.update(eval(myquery_str))
+        if keywords_ != '':
+            myquery_str = """{'keywords':{ '$all':"""
+            myquery_list=[]
+            temp = keywords_.strip().split(',')
+            for temp1 in temp:
+                patt = re.compile('.*'+re.escape(temp1)+'.*', re.IGNORECASE)
+                myquery_list.append(patt)
+            myquery_str+=str(myquery_list)
+            myquery_str+="}}"
+            print(myquery_str)
+            myquery.update(eval(myquery_str))
+
+            
+   
 #
         abstract_ = request.POST.get('abstract')
-        # if abstract_ != '':
-        #    querying = True
-        #    myquery_str = """{'abstract':re.compile('.*""" + \
-        #        re.escape(abstract_)+""".*',re.IGNORECASE)}"""
-        #    myquery.update(eval(myquery_str))
+        if abstract_ != '':
+           
+           myquery_str = """{'abstract':re.compile('.*""" + \
+               re.escape(abstract_)+""".*',re.IGNORECASE)}"""
+           myquery.update(eval(myquery_str))
 #
         # check for year
         year_start = request.POST.get('year_start')
@@ -100,15 +109,20 @@ def processFile(request):
         year_end = request.POST.get('year_end')
         if year_end == '':
             year_end = datetime.datetime.now().year
-        # if year_start != '' or year_end != '':
-        #    querying = True
-        #    myquery_str = """{'year':{"$lte":'""" + \
-        #        str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
-        #    myquery.update(eval(myquery_str))
-#
-        zipf = zipfile.ZipFile('Output.zip', 'w', zipfile.ZIP_DEFLATED)
+        if year_start != '' or year_end != '':
+           
+           myquery_str = """{'year':{"$lte":'""" + \
+               str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
+           myquery.update(eval(myquery_str))
+
         language_ = request.POST.get('language')
         publisher_ = request.POST.get('publisher')
+
+
+
+
+        zipf = zipfile.ZipFile('Output.zip', 'w', zipfile.ZIP_DEFLATED)
+        
         excluded = ''
         content = ''
         for x in bibTexDB.find({}):
@@ -120,6 +134,7 @@ def processFile(request):
 
             if title_ != '':
                 patt = re.compile('.*'+re.escape(title_)+'.*', re.IGNORECASE)
+
                 if patt.search(x['title']) == None:
                     excluded += '\n' + str(x) + '\n' + 'Title not matching\n'
                     excluding = True
@@ -151,10 +166,11 @@ def processFile(request):
 
             if keywords_ != '':
                 # print(x['doi'])
-                patt = re.compile(
-                    '.*'+re.escape(keywords_)+'.*', re.IGNORECASE)
-                temp = keywords_.strip().split(';')
-                for _ in temp:
+                
+                temp = keywords_.strip().split(',')
+                for temp1 in temp:
+                    patt = re.compile(
+                    '.*'+re.escape(temp1)+'.*', re.IGNORECASE)
                     if 'keywords' in x.keys() and patt.search(x['keywords']) == None:
                         excluding = True
                         excluded += '\n' + \
@@ -195,16 +211,16 @@ def processFile(request):
 
             if excluding == False:
                 content += str(x) + '\n\n'
-                url = 'https://scholar.google.com/scholar?lookup=0&q=' + str(x['_id'])
-                page = requests.get(url)
-                sp = bs(page.content, "html.parser")
-                sp = sp.findAll("div", class_="gs_or_ggsm")
-                for s in sp:
-                    pdd = s.find('a')['href']
-                    response = requests.get(pdd)
-                    with open(x['_id']+'.pdf', 'wb') as f:
-                        f.write(response.content)
-                        zipf.write(x['_id']+'.pdf')
+                # url = 'https://scholar.google.com/scholar?lookup=0&q=' + str(x['_id'])
+                # page = requests.get(url)
+                # sp = bs(page.content, "html.parser")
+                # sp = sp.findAll("div", class_="gs_or_ggsm")
+                # for s in sp:
+                #     pdd = s.find('a')['href']
+                #     response = requests.get(pdd)
+                #     with open(x['_id']+'.pdf', 'wb') as f:
+                #         f.write(response.content)
+                #         zipf.write(x['_id']+'.pdf')
 
 
         with open('included.txt', 'w', encoding='utf-8', errors='replace') as f:
@@ -218,7 +234,7 @@ def processFile(request):
         zipf.write('excluded.txt')
         zipf.close()
         # send_from_directory('./', 'Output.zip', as_attachment=True)
-        context = {'bibtex': bibTexDB.find({})}
+        context = {'bibtex': bibTexDB.find(myquery)}
         # return render(request, 'assess.html', context)
         return redirect('/assess')
         # return FileResponse(open('Output.zip','rb'), as_attachment=True, filename='Output.zip')
