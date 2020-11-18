@@ -44,16 +44,16 @@
         <td>{{abib.author}}</td>
          <td><div class="form-check-inline">
             <label class="form-check-label">
-          <input type="radio" class="form-check-input" name="feedback_of_paper" value="Yes">Yes
+          <input type="radio" class="form-check-input" name="feedback_of_paper" value="Yes" onchange="feedback()" >Yes
     </label>
         </div>
         <div class="form-check-inline">
     <label class="form-check-label">
-     <input type="radio" class="form-check-input" name="feedback_of_paper" value="No">No
+     <input type="radio" class="form-check-input" name="feedback_of_paper" value="No" onchange="feedback()">No
     </label>
 </div>
             </td>
-          <td> <input type="text"  name="reason_for_no" disabled></td>
+          <td> <input type="text"  name="reasoning_for_no"  id="reasoning_for_no" disabled="true"></td>
     </tr>
      {% endfor %}
 </table>
@@ -326,7 +326,14 @@
    
 </div>
     <script>
-
+    function feedback(){
+        var ans = document.querySelector('input[name="feedback_of_paper"]:checked').value;
+        if(ans == 'Yes') 
+            { document.getElementById('reasoning_for_no').disabled = true; }
+        else { 
+            document.getElementById('reasoning_for_no').disabled = false; 
+        }
+    }
     </script>
 </body>
 

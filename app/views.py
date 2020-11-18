@@ -89,7 +89,7 @@ def processFile(request):
                 myquery_list.append(patt)
             myquery_str+=str(myquery_list)
             myquery_str+="}}"
-            print(myquery_str)
+            # print(myquery_str)
             myquery.update(eval(myquery_str))
 
             
@@ -116,7 +116,32 @@ def processFile(request):
            myquery.update(eval(myquery_str))
 
         language_ = request.POST.get('language')
+        if language_ != '':
+            patt = re.compile('.*'+re.escape(language_)+'.*', re.IGNORECASE)
+            myquery_str = """{ '$or': [ { 'language': { '$exists':False } }, { 'language':patt } ]}"""
+            # print(myquery_str)            
+            myquery.update(eval(myquery_str))
+            # if language_.lower()=='english':
+                
+            #     myquery_str = """{ '$or': [ { 'language': { '$exists':False } }, { 'language':patt } ]}"""
+            #     print(myquery_str)
+            #     myquery.update(eval(myquery_str))
+            # else:
+            #     myquery_str = """{ 'language':patt }"""
+            #     print(myquery_str)
+            #     myquery.update(eval(myquery_str))
+            
+        
+        
+
+
         publisher_ = request.POST.get('publisher')
+        if publisher_ != '':
+            patt = re.compile('.*'+re.escape(publisher_)+'.*', re.IGNORECASE)
+            myquery_str = """{'$or':[{'publisher':patt  }, { 'booktitle': patt } ] }"""
+            # print(myquery_str)
+            myquery.update(eval(myquery_str))
+
 
 
 
@@ -189,17 +214,17 @@ def processFile(request):
                         continue
 
             if publisher_ != '':
-                # patt = re.compile(
-                #    '.*'+re.escape(publisher_)+'.*', re.IGNORECASE)
+                patt = re.compile(
+                   '.*'+re.escape(publisher_)+'.*', re.IGNORECASE)
                 flag1 = False
                 flag2 = False
-                # if 'publisher' in x.keys() and patt.search(x['publisher']) == publisher_:
-                if 'publisher' in x.keys() and publisher_ in x['publisher']:
-                    # print(x['publisher'])
+                if 'publisher' in x.keys() and patt.search(x['publisher']) != None:
+                # if 'booktitle' in x.keys() and publisher_ in x['publisher']:
+                    print(x['publisher'])
                     flag1 = True
-                # if 'booktitle' in x.keys() and patt.search(x['booktitle']) == publisher_:
-                if 'booktitle' in x.keys() and publisher_ in x['booktitle']:
-                    # print(x['booktitle'])
+                if 'booktitle' in x.keys() and patt.search(x['booktitle']) != None:
+                # if 'booktitle' in x.keys() and publisher_ in x['booktitle']:
+                    print(x['booktitle'])
                     flag2 = True
                 if flag1 == True or flag2 == True:
                     pass
@@ -211,16 +236,18 @@ def processFile(request):
 
             if excluding == False:
                 content += str(x) + '\n\n'
-                # url = 'https://scholar.google.com/scholar?lookup=0&q=' + str(x['_id'])
-                # page = requests.get(url)
-                # sp = bs(page.content, "html.parser")
-                # sp = sp.findAll("div", class_="gs_or_ggsm")
-                # for s in sp:
-                #     pdd = s.find('a')['href']
-                #     response = requests.get(pdd)
-                #     with open(x['_id']+'.pdf', 'wb') as f:
-                #         f.write(response.content)
-                #         zipf.write(x['_id']+'.pdf')
+                url = 'https://scholar.google.com/scholar?lookup=0&q=' + str(x['_id'])+'title:'+str(x['title'])
+                page = requests.get(url)
+                sp = bs(page.content, "html.parser")
+                sp = sp.findAll("div", class_="gs_or_ggsm")
+                for s in sp:
+                    pdd = s.find('a')['href']
+                    response = requests.get(pdd)
+
+                    with open(str(x['_id']).replace("/","")+'.pdf', 'wb') as f:
+                        f.write(response.content)
+                        zipf.write(str(x['_id']).replace("/","")+'.pdf')
+                        os.remove(str(x['_id']).replace("/","")+'.pdf') 
 
 
         with open('included.txt', 'w', encoding='utf-8', errors='replace') as f:
