@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    
+
+
+    <title>Assessment</title>
+
+
+</head>
+
+<body>
+<div class="container mt-5">
+    <form action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
+        <button type="submit" class="btn btn-dark btn-lg mt-2" value="Submit" id="submit">Download excluded</button>
+    </form>
+    <ul>
+        {% for abib in bibtex %}
+        <li>
+            <!--p>{{abib}}</p-->
+            <p>
+                Title: {{abib.title}}<br>
+                DOI: {{abib.ID}}<br>
+                Author: {{abib.author}}
+            </p>
+        </li>
+        <ol>
+            <li>
+                Are the goals of the experiment clear?
+                <input type="radio" name="goals" value="Yes" class="form-control">
+                <label for="yes">Yes</label>
+                <input type="radio" name="goals" value="No" class="form-control">
+                <label for="no">No</label>
+            </li>
+            <li>
+                Were the research questions and hypothesis defined?
+                <input type="radio" name="defined" value="Yes" class="form-control">
+                <label for="yes">Yes</label>
+                <input type="radio" name="defined" value="No" class="form-control">
+                <label for="no">No</label>
+            </li>
+            <li>
+                Was there any replication? For example: multiple test objects or multiple test sets?
+                <input type="radio" name="replication" value="Yes" class="form-control">
+                <label for="yes">Yes</label>
+                <input type="radio" name="replication" value="No" class="form-control">
+                <label for="no">No</label>
+            </li>
+            <li>
+                Are the study measures valid?
+                <input type="radio" name="measures" value="Yes" class="form-control">
+                <label for="yes">Yes</label>
+                <input type="radio" name="measures" value="No" class="form-control">
+                <label for="no">No</label>
+            </li>
+            <li>
+                If the test cases were required by the Test Treatment, how were the test cases generated?
+                <input type="radio" name="testcases" value="Yes" class="form-control">
+                <label for="yes">FILL THIS</label>
+                <input type="radio" name="testcases" value="No" class="form-control">
+                <label for="no">FILL THIS</label>
+            </li>
+            <li>
+                How were the test objects generated?
+                <input type="radio" name="testobjects" value="Yes" class="form-control">
+                <label for="yes">FILL THIS</label>
+                <input type="radio" name="testobjects" value="No" class="form-control">
+                <label for="no">FILL THIS</label>
+            </li>
+            <li>
+                How were the faults/modifications found?
+                <input type="radio" name="faults" value="Yes" class="form-control">
+                <label for="yes">FILL THIS</label>
+                <input type="radio" name="faults" value="No" class="form-control">
+                <label for="no">FILL THIS</label>
+            </li>
+            <li>
+                Did the Statistical analysis match the study design?
+                <input type="radio" name="statanalysis" value="Yes" class="form-control">
+                <label for="yes">Yes</label>
+                <input type="radio" name="statanalysis" value="No" class="form-control">
+                <label for="no">No</label>
+            </li>
+            <li>
+                Was any sensitivity analysis done to assess whether results were due to a specific test object or a
+                specific type of fault/modification?
+                <input type="radio" name="sensanalysis" value="Yes" class="form-control">
+                <label for="yes">Yes</label>
+                <input type="radio" name="sensanalysis" value="No" class="form-control">
+                <label for="no">No</label>
+            </li>
+            <li>
+                Were limitations of the study reported either during the explanation of the study design or during the
+                discussion of the study results?
+                <input type="radio" name="limitations" value="Yes" class="form-control">
+                <label for="yes">Yes</label>
+                <input type="radio" name="limitations" value="No" class="form-control">
+                <label for="no">No</label>
+            </li>
+            <li>
+                Were the findings clearly reported?
+                <input type="radio" name="reported" value="Yes" class="form-control">
+                <label for="yes">Yes</label>
+                <input type="radio" name="reported" value="No" class="form-control">
+                <label for="no">No</label>
+            </li>
+            <li>
+                Are the findings of value to industry or researchers?
+                <input type="radio" name="value" value="Yes" class="form-control">
+                <label for="yes">Yes</label>
+                <input type="radio" name="value" value="No" class="form-control">
+                <label for="no">No</label>
+            </li>
+        </ol>
+        {% endfor %}
+    </ul>
+</div>
+    <script>
+
+    </script>
+</body>
+
+</html>

@@ -11,9 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker.css"
-        rel="stylesheet" />
+    
 
 
     <title>Assessment</title>
@@ -22,113 +20,311 @@
 </head>
 
 <body>
-
+<div class="container mt-5">
     <form action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
-        <button type="submit" class="btn btn-dark btn-lg mt-2" value="Submit" id="submit">Download excluded</button>
+        <button type="submit" class="btn btn-dark btn-lg mt-2" value="Submit" id="submit">      Download excluded</button>
     </form>
-    <ul>
-        {% for abib in bibtex %}
-        <li>
-            <!--p>{{abib}}</p-->
-            <p>
-                Title: {{abib.title}}<br>
-                DOI: {{abib.ID}}<br>
-                Author: {{abib.author}}<br>
-                
-                <a href="/getPaper?doi={{abib.ID}}" target="_blank">Download paper</a><br>
-            </p>
-        </li>
-        <ol>
-            <li>
+</div>
+<div class="container mt-5">
+    <table class="table">
+    <thead class="thead-dark">
+         <tr>
+            <th>Paper Title</th>
+       <th>Paper DOI</th>
+       <th>Paper Author</th>
+       <th>Is this paper meeting your assessment?</th>
+       <th> If no,explain why?</th>
+
+      </tr>
+    </thead>
+    {% for abib in bibtex %}
+    <tr>
+        <td>{{abib.title}}</td>
+        <td>{{abib.ID}}</td>
+        <td>{{abib.author}}</td>
+         <td><div class="form-check-inline">
+            <label class="form-check-label">
+          <input type="radio" class="form-check-input" name="feedback_of_paper" value="Yes">Yes
+    </label>
+        </div>
+        <div class="form-check-inline">
+    <label class="form-check-label">
+     <input type="radio" class="form-check-input" name="feedback_of_paper" value="No">No
+    </label>
+</div>
+            </td>
+          <td> <input type="text"  name="reason_for_no" disabled></td>
+    </tr>
+     {% endfor %}
+</table>
+</div>
+
+<br>
+<br>
+<br>
+<hr width="75%">
+<br>
+<br>
+
+
+       <div class="container mt-5">
+        <div class="form-row ">
+        <div class="col ml-10">
                 Are the goals of the experiment clear?
-                <input type="radio" name="goals" value="Yes" class="form-control">
-                <label for="yes">Yes</label>
-                <input type="radio" name="goals" value="No" class="form-control">
-                <label for="no">No</label>
-            </li>
-            <li>
+            </div>
+            <div class="col ml-2">
+                <br>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="goals" value="Yes">Yes
+                     </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                     <input type="radio" class="form-check-input" name="goals" value="No">No
+                    </label>
+                </div>
+               <br>
+           </div>
+            </div>
+            <br>
+            <br>
+            <div class="form-row ">
+        <div class="col ml-10">
                 Were the research questions and hypothesis defined?
-                <input type="radio" name="defined" value="Yes" class="form-control">
-                <label for="yes">Yes</label>
-                <input type="radio" name="defined" value="No" class="form-control">
-                <label for="no">No</label>
-            </li>
-            <li>
+               </div>
+            <div class="col ml-2">
+                <br>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="defined" value="Yes">Yes
+                     </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                     <input type="radio" class="form-check-input" name="defined" value="No">No
+                    </label>
+                </div>
+                <br>
+            </div>
+            </div>
+            <br>
+            <br>
+            <div class="form-row ">
+        <div class="col ml-10">
                 Was there any replication? For example: multiple test objects or multiple test sets?
-                <input type="radio" name="replication" value="Yes" class="form-control">
-                <label for="yes">Yes</label>
-                <input type="radio" name="replication" value="No" class="form-control">
-                <label for="no">No</label>
-            </li>
-            <li>
+                 <br>
+                 </div>
+                 <div class="col ml-2">
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="replication" value="Yes">Yes
+                     </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                     <input type="radio" class="form-check-input" name="replication" value="No">No
+                    </label>
+                </div>
+                <br>
+             </div>
+            </div>
+            <br>
+            <br>
+             <div class="form-row ">
+        <div class="col ml-10">
                 Are the study measures valid?
-                <input type="radio" name="measures" value="Yes" class="form-control">
-                <label for="yes">Yes</label>
-                <input type="radio" name="measures" value="No" class="form-control">
-                <label for="no">No</label>
-            </li>
-            <li>
+                 <br>
+                 </div>
+                 <div class="col ml-2">
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="measures" value="Yes">Yes
+                     </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                     <input type="radio" class="form-check-input" name="measures" value="No">No
+                    </label>
+                </div>
+                <br>
+                
+            </div>
+            </div>
+            <br>
+            <br>
+            <div class="form-row ">
+        <div class="col ml-10">
                 If the test cases were required by the Test Treatment, how were the test cases generated?
-                <input type="radio" name="testcases" value="Yes" class="form-control">
-                <label for="yes">FILL THIS</label>
-                <input type="radio" name="testcases" value="No" class="form-control">
-                <label for="no">FILL THIS</label>
-            </li>
-            <li>
+                <br>
+                </div>
+                 <div class="col ml-2">
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="testcases" value="Yes">Yes
+                     </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                     <input type="radio" class="form-check-input" name="testcases" value="No">No
+                    </label>
+                </div>
+                <br>
+            </div>
+            </div>
+            <br>
+            <br>
+             <div class="form-row ">
+        <div class="col ml-10">
                 How were the test objects generated?
-                <input type="radio" name="testobjects" value="Yes" class="form-control">
-                <label for="yes">FILL THIS</label>
-                <input type="radio" name="testobjects" value="No" class="form-control">
-                <label for="no">FILL THIS</label>
-            </li>
-            <li>
+                <br>
+                </div>
+                 <div class="col ml-2">
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="testobjects" value="Yes">Yes
+                     </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                     <input type="radio" class="form-check-input" name="testobjects" value="No">No
+                    </label>
+                </div>
+                <br>
+           </div>
+            </div>
+            <br>
+            <br>
+             <div class="form-row ">
+        <div class="col ml-10">
                 How were the faults/modifications found?
-                <input type="radio" name="faults" value="Yes" class="form-control">
-                <label for="yes">FILL THIS</label>
-                <input type="radio" name="faults" value="No" class="form-control">
-                <label for="no">FILL THIS</label>
-            </li>
-            <li>
+                <br>
+                </div>
+                 <div class="col ml-2">
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="faults" value="Yes">Yes
+                     </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                     <input type="radio" class="form-check-input" name="faults" value="No">No
+                    </label>
+                </div>
+                <br>
+              </div>
+            </div>
+            <br>
+            <br>
+             <div class="form-row ">
+        <div class="col ml-10">
                 Did the Statistical analysis match the study design?
-                <input type="radio" name="statanalysis" value="Yes" class="form-control">
-                <label for="yes">Yes</label>
-                <input type="radio" name="statanalysis" value="No" class="form-control">
-                <label for="no">No</label>
-            </li>
-            <li>
+                <br>
+                 </div>
+                 <div class="col ml-2">
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="statanalysis" value="Yes">Yes
+                     </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                     <input type="radio" class="form-check-input" name="statanalysis" value="No">No
+                    </label>
+                </div>
+                <br>
+            </div>
+            </div>
+            <br>
+            <br>
+              <div class="form-row ">
+        <div class="col ml-10">
                 Was any sensitivity analysis done to assess whether results were due to a specific test object or a
                 specific type of fault/modification?
-                <input type="radio" name="sensanalysis" value="Yes" class="form-control">
-                <label for="yes">Yes</label>
-                <input type="radio" name="sensanalysis" value="No" class="form-control">
-                <label for="no">No</label>
-            </li>
-            <li>
+                <br>
+                 </div>
+                 <div class="col ml-2">
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="sensanalysis" value="Yes">Yes
+                     </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                     <input type="radio" class="form-check-input" name="sensanalysis" value="No">No
+                    </label>
+                </div>
+                <br>
+              </div>
+            </div>
+            <br>
+            <br>
+                <div class="form-row ">
+        <div class="col ml-10">
                 Were limitations of the study reported either during the explanation of the study design or during the
                 discussion of the study results?
-                <input type="radio" name="limitations" value="Yes" class="form-control">
-                <label for="yes">Yes</label>
-                <input type="radio" name="limitations" value="No" class="form-control">
-                <label for="no">No</label>
-            </li>
-            <li>
+                <br>
+                </div>
+                 <div class="col ml-2">
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="limitations" value="Yes">Yes
+                     </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                     <input type="radio" class="form-check-input" name="limitations" value="No">No
+                    </label>
+                </div>
+                <br>
+           </div>
+            </div>
+            <br>
+            <br>
+               <div class="form-row ">
+        <div class="col ml-10">
                 Were the findings clearly reported?
-                <input type="radio" name="reported" value="Yes" class="form-control">
-                <label for="yes">Yes</label>
-                <input type="radio" name="reported" value="No" class="form-control">
-                <label for="no">No</label>
-            </li>
-            <li>
+                <br>
+                </div>
+                 <div class="col ml-2">
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="reported" value="Yes">Yes
+                     </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                     <input type="radio" class="form-check-input" name="reported" value="No">No
+                    </label>
+                </div>
+                <br>
+             </div>
+            </div>
+            <br>
+            <br>
+              <div class="form-row ">
+        <div class="col ml-10">
                 Are the findings of value to industry or researchers?
-                <input type="radio" name="value" value="Yes" class="form-control">
-                <label for="yes">Yes</label>
-                <input type="radio" name="value" value="No" class="form-control">
-                <label for="no">No</label>
-            </li>
-        </ol>
-        {% endfor %}
-    </ul>
-
+                <br>
+                 </div>
+                 <div class="col ml-2">
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="value" value="Yes">Yes
+                     </label>
+                </div>
+                <div class="form-check-inline">
+                    <label class="form-check-label">
+                     <input type="radio" class="form-check-input" name="value" value="No">No
+                    </label>
+                </div>
+                <br>
+              </div>
+            </div>
+        
+      
+   
+</div>
     <script>
 
     </script>
