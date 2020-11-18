@@ -1,9 +1,9 @@
 from django.shortcuts import render
 
 # Create your views here.
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from django.template import RequestContext
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponseRedirect, HttpResponse
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
@@ -18,13 +18,15 @@ import json
 import zipfile
 import sys
 import codecs
-
+from bs4 import BeautifulSoup as bs
+import requests
 
 # def index(request):
 #     if request.method == 'GET':
 #         return render(request, 'index.html')
 
 context = {}
+
 
 def processFile(request):
     global context
@@ -64,41 +66,41 @@ def processFile(request):
 
         #myquery = {}
         title_ = request.POST.get('title')
-        #if title_ != '':
+        # if title_ != '':
         #    querying = True
         #    myquery_str = """{'title':re.compile('.*""" + \
         #        re.escape(title_)+""".*',re.IGNORECASE)}"""
         #    myquery.update(eval(myquery_str))
 #
         author_name = request.POST.get('author')
-        #if author_name != '':
+        # if author_name != '':
         #    querying = True
         #    myquery_str = """{'author':re.compile('.*""" + \
         #        re.escape(author_name)+""".*',re.IGNORECASE)}"""
         #    myquery.update(eval(myquery_str))
 #
         keywords_ = request.POST.get('keywords')
-        #if keywords_ != '':
+        # if keywords_ != '':
         #    querying = True
         #    myquery_str = """{'keywords':re.compile('.*""" + \
         #        re.escape(keywords_)+""".*',re.IGNORECASE)}"""
         #    myquery.update(eval(myquery_str))
 #
         abstract_ = request.POST.get('abstract')
-        #if abstract_ != '':
+        # if abstract_ != '':
         #    querying = True
         #    myquery_str = """{'abstract':re.compile('.*""" + \
         #        re.escape(abstract_)+""".*',re.IGNORECASE)}"""
         #    myquery.update(eval(myquery_str))
 #
-        ## check for year
+        # check for year
         year_start = request.POST.get('year_start')
         if year_start == '':
             year_start = 2000
         year_end = request.POST.get('year_end')
         if year_end == '':
             year_end = datetime.datetime.now().year
-        #if year_start != '' or year_end != '':
+        # if year_start != '' or year_end != '':
         #    querying = True
         #    myquery_str = """{'year':{"$lte":'""" + \
         #        str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
@@ -170,14 +172,38 @@ def processFile(request):
         zipf.close()
         # send_from_directory('./', 'Output.zip', as_attachment=True)
         context = {'bibtex': bibTexDB.find({})}
-        #return render(request, 'assess.html', context)
+        # return render(request, 'assess.html', context)
         return redirect('/assess')
-        #return FileResponse(open('Output.zip','rb'), as_attachment=True, filename='Output.zip')
+        # return FileResponse(open('Output.zip','rb'), as_attachment=True, filename='Output.zip')
     elif request.method == 'GET':
         return render(request, 'index.html')
 
 
 def assess(request):
     if request.method == 'POST':
-        return FileResponse(open('Output.zip','rb'), as_attachment=True, filename='Output.zip')
+        return FileResponse(open('Output.zip', 'rb'), as_attachment=True, filename='Output.zip')
     return render(request, 'assess.html', context)
+
+
+def downloadPaper(request):
+    if request.method == 'POST':
+        return HttpResponse('')
+    if request.method == 'GET':
+        doi = request.GET.get('doi', 0)
+        print('DOI is '+str(doi))
+        if doi == 0:
+            return HttpResponse('')
+        try:
+            url = 'https://scholar.google.com/scholar?lookup=0&q=' + \
+                str(doi)  # test with 10.1109/MCSE.2007.58
+            page = requests.get(url)
+            sp = bs(page.content, "html.parser")
+            sp = sp.findAll("div", class_="gs_or_ggsm")
+            for s in sp:
+                pdd = s.find('a')['href']
+                if pdd is None:
+                    continue
+                return HttpResponseRedirect(pdd)
+            return HttpResponse('')
+        except Exception:
+            return HttpResponse('')
