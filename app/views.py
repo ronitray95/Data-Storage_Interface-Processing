@@ -55,6 +55,7 @@ def processFile(request):
                     primkey = bib_database.entries[i].pop('ID')
                 bib_database.entries[i]['Yes'] = 0
                 bib_database.entries[i]['No'] = 0
+                bib_database.entries[i]['Responses'] = []
                 bibTexDB.update_one({'_id': primkey},
                                     {'$set': bib_database.entries[i]},
                                     upsert=True)
@@ -302,11 +303,12 @@ def assessment(request):
         if key != 'csrfmiddlewaretoken':
             x = bibTexDB.find_one({"_id": key})
             if request.POST.get(key) == 'Yes':
-                #y = x
                 x['Yes'] += 1
-                bibTexDB.update_one({'_id': key},
+            elif request.POST.get(key) == 'No':
+                x['No'] += 1
+            if request.POST.get('r'+str(key))!='':
+                x['Responses'].append(request.POST.get('r'+str(key)))
+            bibTexDB.update_one({'_id': key},
                                     {'$set': x},
                                     upsert=True)
-            elif request.POST.get(key) == 'No':
-                pass
-    return redirect('/assess')
+    return redirect('/')
