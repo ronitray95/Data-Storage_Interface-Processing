@@ -1,6 +1,4 @@
-from django.shortcuts import render
 
-# Create your views here.
 from django.shortcuts import render, redirect
 from django.template import RequestContext
 from django.http import FileResponse, HttpResponseRedirect, HttpResponse
@@ -11,6 +9,8 @@ import bibtexparser as btp
 from bibtexparser.bparser import BibTexParser as parseOpts
 from pymongo import MongoClient, errors
 from werkzeug.utils import secure_filename
+from bs4 import BeautifulSoup as bs
+
 import re
 import datetime
 import os
@@ -19,18 +19,22 @@ import zipfile
 import sys
 import time
 import codecs
-from bs4 import BeautifulSoup as bs
 import requests
+import uuid
 
 context = {}
+search_uuid = ''
 
 
 def processFile(request):
     global context
+    global search_uuid
+    search_uuid = uuid.uuid4().urn[9:]
+
     if request.method == 'POST':
         parser = parseOpts(common_strings=True)
         client = MongoClient(
-            "mongodb+srv://admin:admin123@cluster0.ajwby.mongodb.net/testDB?retryWrites=true&w=majority")
+            "mongodb+srv://admin:admin123@cluster0.ajwby.mongodb.net/?retryWrites=true&w=majority")
         uploaded_file = request.FILES.get('bibfile', '')
 
         try:
@@ -40,8 +44,8 @@ def processFile(request):
         except errors.ServerSelectionTimeoutError as err:
             print("pymongo ERROR:", err)
 
-        db = client["testDB"]
-        bibTexDB = db['bibTex']
+        db = client['bibtex_entries']
+        bibTexDB = db[search_uuid]
         if uploaded_file != '':
             bib_database = parser.parse_file(file=uploaded_file, partial=True)
             for i in range(len(bib_database.entries)):
@@ -189,24 +193,28 @@ def processFile(request):
 
             if excluding == False:
                 content += str(x) + '\n\n'
+                break  # <--------------REMOVE THIS
                 url = 'https://scholar.google.com/scholar?lookup=0&q=' + \
                     x['_id']  # +'title:'+str(x['title'])
                 # print(url)
                 time.sleep(2)
                 page = requests.get(url)
                 sp = bs(page.content, "html.parser")
-                print(page.content)
+                # print(page.content)
                 #sp = sp.findAll("div", class_="gs_or_ggsm")
                 sp = sp.findAll("div", {"class": "gs_or_ggsm"})
-                print(sp)
+                # print(sp)
                 for s in sp:
                     pdd = s.find('a')['href']
+                    if pdd is None:
+                        continue
                     response = requests.get(pdd)
 
                     with open(str(x['_id']).replace("/", "")+'.pdf', 'wb') as f:
                         f.write(response.content)
                         zipf.write(str(x['_id']).replace("/", "")+'.pdf')
                     os.remove(str(x['_id']).replace("/", "")+'.pdf')
+                    break
 
         with open('included.txt', 'w', encoding='utf-8', errors='replace') as f:
             f.write(content)
@@ -256,20 +264,30 @@ def downloadPaper(request):
 
 def assessment(request):
     client = MongoClient(
-        "mongodb+srv://admin:admin123@cluster0.ajwby.mongodb.net/testDB?retryWrites=true&w=majority")
-    db = client["testDB"]
-    bibTexDB = db['bibTex']
+        "mongodb+srv://admin:admin123@cluster0.ajwby.mongodb.net/?retryWrites=true&w=majority")
+    db = client['user_feedback']
+    bibTexDB = db[search_uuid]
     print(request.POST)
+    print(request.POST.keys())
     for key in request.POST.keys():
-        if key != 'csrfmiddlewaretoken':
-            x = bibTexDB.find_one({"_id": key})
-            if request.POST.get(key) == 'Yes':
-                x['Yes'] += 1
-            elif request.POST.get(key) == 'No':
-                x['No'] += 1
-            if request.POST.get('r'+str(key)) != '':
-                x['Responses'].append(request.POST.get('r'+str(key)))
-            bibTexDB.update_one({'_id': key},
-                                {'$set': x},
+        if key == 'csrfmiddlewaretoken' or key == 'r':
+            continue
+        if key[0] == 'r':
+            doiResult = {}
+            user_comment = request.POST.get(key, 'N.A.')
+            user_comment = 'N.A' if user_comment.strip() == '' else user_comment
+            user_assess = request.POST.get(key[1:], 'Undefined')
+            bibTexDB.update_one({'_id': key[1:]}, {'$set': {'user_comment': user_comment, 'user_assess': user_assess}},
                                 upsert=True)
+    #bibTexDB.update_one({'_id':'feedback'},{'$set':{}})
+            #results[key[1:]] = request.POST[key]
+        # x = bibTexDB.find_one({"_id": key[1:]})
+        # # print(x)
+        # if request.POST.get(key) == 'Yes':
+        #     x['Yes'] += 1
+        # elif request.POST.get(key) == 'No':
+        #     x['No'] += 1
+        # if request.POST.get('r'+str(key)) != '':
+        #     x['Responses'].append(request.POST.get('r'+str(key)))
+        # bibTexDB.update_one({'_id': key[1:]}, {'$set': x}, upsert=True)
     return redirect('/')
