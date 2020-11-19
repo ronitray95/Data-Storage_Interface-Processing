@@ -1,0 +1,10 @@
+
+SSD bibtexts ACM.txt
+SSD bibtexts IEEE.txt
+excluded.txt
+included.txt
+Output.zip
+app/__pycache__/
+app/migrations/__pycache__/
+ssd37/__pycache__/
+.vscode/

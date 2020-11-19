@@ -1,3 +1,5 @@
 bibtexparser
 pymongo
 dnspython
+django
+beautifulsoup4
