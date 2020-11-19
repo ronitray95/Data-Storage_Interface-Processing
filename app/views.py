@@ -193,17 +193,13 @@ def processFile(request):
 
             if excluding == False:
                 content += str(x) + '\n\n'
-                break  # <--------------REMOVE THIS
-                url = 'https://scholar.google.com/scholar?lookup=0&q=' + \
-                    x['_id']  # +'title:'+str(x['title'])
-                # print(url)
+                #break  # <--------------REMOVE THIS
+                url = 'https://scholar.google.com/scholar?lookup=0&q=' + x['_id']
                 time.sleep(2)
                 page = requests.get(url)
                 sp = bs(page.content, "html.parser")
-                # print(page.content)
                 #sp = sp.findAll("div", class_="gs_or_ggsm")
                 sp = sp.findAll("div", {"class": "gs_or_ggsm"})
-                # print(sp)
                 for s in sp:
                     pdd = s.find('a')['href']
                     if pdd is None:
@@ -243,12 +239,10 @@ def downloadPaper(request):
         return HttpResponse('')
     if request.method == 'GET':
         doi = request.GET.get('doi', 0)
-        print('DOI is '+str(doi))
         if doi == 0:
             return HttpResponse('')
         try:
-            url = 'https://scholar.google.com/scholar?lookup=0&q=' + \
-                str(doi)  # test with 10.1109/MCSE.2007.58
+            url = 'https://scholar.google.com/scholar?lookup=0&q=' + str(doi)
             page = requests.get(url)
             sp = bs(page.content, "html.parser")
             sp = sp.findAll("div", class_="gs_or_ggsm")
@@ -267,8 +261,7 @@ def assessment(request):
         "mongodb+srv://admin:admin123@cluster0.ajwby.mongodb.net/?retryWrites=true&w=majority")
     db = client['user_feedback']
     bibTexDB = db[search_uuid]
-    print(request.POST)
-    print(request.POST.keys())
+
     for key in request.POST.keys():
         if key == 'csrfmiddlewaretoken' or key == 'r':
             continue
@@ -279,15 +272,20 @@ def assessment(request):
             user_assess = request.POST.get(key[1:], 'Undefined')
             bibTexDB.update_one({'_id': key[1:]}, {'$set': {'user_comment': user_comment, 'user_assess': user_assess}},
                                 upsert=True)
-    #bibTexDB.update_one({'_id':'feedback'},{'$set':{}})
-            #results[key[1:]] = request.POST[key]
-        # x = bibTexDB.find_one({"_id": key[1:]})
-        # # print(x)
-        # if request.POST.get(key) == 'Yes':
-        #     x['Yes'] += 1
-        # elif request.POST.get(key) == 'No':
-        #     x['No'] += 1
-        # if request.POST.get('r'+str(key)) != '':
-        #     x['Responses'].append(request.POST.get('r'+str(key)))
-        # bibTexDB.update_one({'_id': key[1:]}, {'$set': x}, upsert=True)
+    general = {
+        'goals': request.POST.get('goals', 'N.A.'),
+        'defined': request.POST.get('defined', 'N.A.'),
+        'replication': request.POST.get('replication', 'N.A.'),
+        'measures': request.POST.get('measures', 'N.A.'),
+        'testcases': request.POST.get('testcases', 'N.A.'),
+        'testobjects': request.POST.get('testobjects', 'N.A.'),
+        'faults': request.POST.get('faults', 'N.A.'),
+        'statanalysis': request.POST.get('statanalysis', 'N.A.'),
+        'sensanalysis': request.POST.get('sensanalysis', 'N.A.'),
+        'limitations': request.POST.get('limitations', 'N.A.'),
+        'reported': request.POST.get('reported', 'N.A.'),
+        'value': request.POST.get('value', 'N.A.')}
+
+    bibTexDB.update_one({'_id': 'feedback'}, {'$set': general}, upsert=True)
+    print(general)
     return redirect('/')

@@ -34,7 +34,8 @@
                 </thead>
                 {% for abib in bibtex %}
                 <tr>
-                    <td>{{abib.title}}</td>
+                    <td><a href="/getPaper?doi={{abib.ID}}" title="Click to download" target="_blank">{{abib.title}}</a>
+                    </td>
                     <td>{{abib.ID}}</td>
                     <td>{{abib.author}}</td>
                     <td>
