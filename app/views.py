@@ -17,6 +17,7 @@ import os
 import json
 import zipfile
 import sys
+import time
 import codecs
 from bs4 import BeautifulSoup as bs
 import requests
@@ -34,7 +35,8 @@ def processFile(request):
         parser = parseOpts(common_strings=True)
         client = MongoClient(
             "mongodb+srv://admin:admin123@cluster0.ajwby.mongodb.net/testDB?retryWrites=true&w=majority")
-        uploaded_file = request.POST.get('file', '')
+        uploaded_file = request.FILES.get('bibfile', '')
+
         try:
             client.server_info()
             print("server_info():", "OK")
@@ -45,18 +47,14 @@ def processFile(request):
         db = client["testDB"]
         bibTexDB = db['bibTex']
         if uploaded_file != '':
-            # uploaded_file.save(secure_filename(uploaded_file.name))
-            x = secure_filename(uploaded_file)
-            x = default_storage.save(x, ContentFile(uploaded_file.read()))
-            with open(x, encoding='utf-8') as bibtex_file:
-                bib_database = parser.parse_file(
-                    file=bibtex_file, partial=True)
-
+            bib_database = parser.parse_file(file=uploaded_file, partial=True)
             for i in range(len(bib_database.entries)):
                 if 'doi' in bib_database.entries[i].keys():
                     primkey = bib_database.entries[i].pop('doi')
                 else:
                     primkey = bib_database.entries[i].pop('ID')
+                bib_database.entries[i]['Yes'] = 0
+                bib_database.entries[i]['No'] = 0
                 bibTexDB.update_one({'_id': primkey},
                                     {'$set': bib_database.entries[i]},
                                     upsert=True)
@@ -67,40 +65,39 @@ def processFile(request):
         myquery = {}
         title_ = request.POST.get('title')
         if title_ != '':
-          
-           myquery_str = """{'title':re.compile('.*""" + \
-               re.escape(title_)+""".*',re.IGNORECASE)}"""
-           myquery.update(eval(myquery_str))
+
+            myquery_str = """{'title':re.compile('.*""" + \
+                re.escape(title_)+""".*',re.IGNORECASE)}"""
+            myquery.update(eval(myquery_str))
 
         author_name = request.POST.get('author')
         if author_name != '':
-           
-           myquery_str = """{'author':re.compile('.*""" + \
-               re.escape(author_name)+""".*',re.IGNORECASE)}"""
-           myquery.update(eval(myquery_str))
+
+            myquery_str = """{'author':re.compile('.*""" + \
+                re.escape(author_name)+""".*',re.IGNORECASE)}"""
+            myquery.update(eval(myquery_str))
 
         keywords_ = request.POST.get('keywords')
         if keywords_ != '':
             myquery_str = """{'keywords':{ '$all':"""
-            myquery_list=[]
+            myquery_list = []
             temp = keywords_.strip().split(',')
             for temp1 in temp:
                 patt = re.compile('.*'+re.escape(temp1)+'.*', re.IGNORECASE)
                 myquery_list.append(patt)
-            myquery_str+=str(myquery_list)
-            myquery_str+="}}"
+            myquery_str += str(myquery_list)
+            myquery_str += "}}"
             # print(myquery_str)
             myquery.update(eval(myquery_str))
 
-            
-   
+
 #
         abstract_ = request.POST.get('abstract')
         if abstract_ != '':
-           
-           myquery_str = """{'abstract':re.compile('.*""" + \
-               re.escape(abstract_)+""".*',re.IGNORECASE)}"""
-           myquery.update(eval(myquery_str))
+
+            myquery_str = """{'abstract':re.compile('.*""" + \
+                re.escape(abstract_)+""".*',re.IGNORECASE)}"""
+            myquery.update(eval(myquery_str))
 #
         # check for year
         year_start = request.POST.get('year_start')
@@ -110,19 +107,19 @@ def processFile(request):
         if year_end == '':
             year_end = datetime.datetime.now().year
         if year_start != '' or year_end != '':
-           
-           myquery_str = """{'year':{"$lte":'""" + \
-               str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
-           myquery.update(eval(myquery_str))
+
+            myquery_str = """{'year':{"$lte":'""" + \
+                str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
+            myquery.update(eval(myquery_str))
 
         language_ = request.POST.get('language')
         if language_ != '':
             patt = re.compile('.*'+re.escape(language_)+'.*', re.IGNORECASE)
             myquery_str = """{ '$or': [ { 'language': { '$exists':False } }, { 'language':patt } ]}"""
-            # print(myquery_str)            
+            # print(myquery_str)
             myquery.update(eval(myquery_str))
             # if language_.lower()=='english':
-                
+
             #     myquery_str = """{ '$or': [ { 'language': { '$exists':False } }, { 'language':patt } ]}"""
             #     print(myquery_str)
             #     myquery.update(eval(myquery_str))
@@ -130,10 +127,6 @@ def processFile(request):
             #     myquery_str = """{ 'language':patt }"""
             #     print(myquery_str)
             #     myquery.update(eval(myquery_str))
-            
-        
-        
-
 
         publisher_ = request.POST.get('publisher')
         if publisher_ != '':
@@ -142,12 +135,8 @@ def processFile(request):
             # print(myquery_str)
             myquery.update(eval(myquery_str))
 
-
-
-
-
         zipf = zipfile.ZipFile('Output.zip', 'w', zipfile.ZIP_DEFLATED)
-        
+
         excluded = ''
         content = ''
         for x in bibTexDB.find({}):
@@ -191,11 +180,11 @@ def processFile(request):
 
             if keywords_ != '':
                 # print(x['doi'])
-                
+
                 temp = keywords_.strip().split(',')
                 for temp1 in temp:
                     patt = re.compile(
-                    '.*'+re.escape(temp1)+'.*', re.IGNORECASE)
+                        '.*'+re.escape(temp1)+'.*', re.IGNORECASE)
                     if 'keywords' in x.keys() and patt.search(x['keywords']) == None:
                         excluding = True
                         excluded += '\n' + \
@@ -215,16 +204,16 @@ def processFile(request):
 
             if publisher_ != '':
                 patt = re.compile(
-                   '.*'+re.escape(publisher_)+'.*', re.IGNORECASE)
+                    '.*'+re.escape(publisher_)+'.*', re.IGNORECASE)
                 flag1 = False
                 flag2 = False
                 if 'publisher' in x.keys() and patt.search(x['publisher']) != None:
-                # if 'booktitle' in x.keys() and publisher_ in x['publisher']:
-                    print(x['publisher'])
+                    # if 'booktitle' in x.keys() and publisher_ in x['publisher']:
+                    # print(x['publisher'])
                     flag1 = True
                 if 'booktitle' in x.keys() and patt.search(x['booktitle']) != None:
-                # if 'booktitle' in x.keys() and publisher_ in x['booktitle']:
-                    print(x['booktitle'])
+                    # if 'booktitle' in x.keys() and publisher_ in x['booktitle']:
+                    # print(x['booktitle'])
                     flag2 = True
                 if flag1 == True or flag2 == True:
                     pass
@@ -236,19 +225,24 @@ def processFile(request):
 
             if excluding == False:
                 content += str(x) + '\n\n'
-                url = 'https://scholar.google.com/scholar?lookup=0&q=' + str(x['_id'])+'title:'+str(x['title'])
+                '''url = 'https://scholar.google.com/scholar?lookup=0&q=' + \
+                    x['_id']  # +'title:'+str(x['title'])
+                # print(url)
+                time.sleep(2)
                 page = requests.get(url)
                 sp = bs(page.content, "html.parser")
-                sp = sp.findAll("div", class_="gs_or_ggsm")
+                print(page.content)
+                #sp = sp.findAll("div", class_="gs_or_ggsm")
+                sp = sp.findAll("div", {"class": "gs_or_ggsm"})
+                print(sp)
                 for s in sp:
                     pdd = s.find('a')['href']
                     response = requests.get(pdd)
 
-                    with open(str(x['_id']).replace("/","")+'.pdf', 'wb') as f:
+                    with open(str(x['_id']).replace("/", "")+'.pdf', 'wb') as f:
                         f.write(response.content)
-                        zipf.write(str(x['_id']).replace("/","")+'.pdf')
-                        os.remove(str(x['_id']).replace("/","")+'.pdf') 
-
+                        zipf.write(str(x['_id']).replace("/", "")+'.pdf')
+                    os.remove(str(x['_id']).replace("/", "")+'.pdf')'''
 
         with open('included.txt', 'w', encoding='utf-8', errors='replace') as f:
             f.write(content)
@@ -256,7 +250,6 @@ def processFile(request):
         with open('excluded.txt', 'w', encoding='utf-8', errors='replace') as f:
             f.write(excluded)
 
-        
         zipf.write('included.txt')
         zipf.write('excluded.txt')
         zipf.close()
@@ -297,3 +290,23 @@ def downloadPaper(request):
             return HttpResponse('')
         except Exception:
             return HttpResponse('')
+
+
+def assessment(request):
+    client = MongoClient(
+        "mongodb+srv://admin:admin123@cluster0.ajwby.mongodb.net/testDB?retryWrites=true&w=majority")
+    db = client["testDB"]
+    bibTexDB = db['bibTex']
+    print(request.POST)
+    for key in request.POST.keys():
+        if key != 'csrfmiddlewaretoken':
+            x = bibTexDB.find_one({"_id": key})
+            if request.POST.get(key) == 'Yes':
+                #y = x
+                x['Yes'] += 1
+                bibTexDB.update_one({'_id': key},
+                                    {'$set': x},
+                                    upsert=True)
+            elif request.POST.get(key) == 'No':
+                pass
+    return redirect('/assess')

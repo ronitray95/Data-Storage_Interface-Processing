@@ -25,5 +25,6 @@ urlpatterns = [
     url(r'^$', app.views.processFile, name='home'),
     # url(r'post$',app.views.processFile,name='processFile'),
     path('assess/', app.views.assess),
-    path('getPaper/', app.views.downloadPaper)
+    path('getPaper/', app.views.downloadPaper),
+    path('assessment/', app.views.assessment)
 ]
