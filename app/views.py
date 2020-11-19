@@ -22,10 +22,6 @@ import codecs
 from bs4 import BeautifulSoup as bs
 import requests
 
-# def index(request):
-#     if request.method == 'GET':
-#         return render(request, 'index.html')
-
 context = {}
 
 
@@ -61,19 +57,15 @@ def processFile(request):
                                     upsert=True)
             print(str(bibTexDB.count_documents({})) + ' docs present')
 
-            # os.remove(os.path.join('./', uploaded_file.filename))
-
         myquery = {}
         title_ = request.POST.get('title')
         if title_ != '':
-
             myquery_str = """{'title':re.compile('.*""" + \
                 re.escape(title_)+""".*',re.IGNORECASE)}"""
             myquery.update(eval(myquery_str))
 
         author_name = request.POST.get('author')
         if author_name != '':
-
             myquery_str = """{'author':re.compile('.*""" + \
                 re.escape(author_name)+""".*',re.IGNORECASE)}"""
             myquery.update(eval(myquery_str))
@@ -88,14 +80,10 @@ def processFile(request):
                 myquery_list.append(patt)
             myquery_str += str(myquery_list)
             myquery_str += "}}"
-            # print(myquery_str)
             myquery.update(eval(myquery_str))
 
-
-#
         abstract_ = request.POST.get('abstract')
         if abstract_ != '':
-
             myquery_str = """{'abstract':re.compile('.*""" + \
                 re.escape(abstract_)+""".*',re.IGNORECASE)}"""
             myquery.update(eval(myquery_str))
@@ -108,7 +96,6 @@ def processFile(request):
         if year_end == '':
             year_end = datetime.datetime.now().year
         if year_start != '' or year_end != '':
-
             myquery_str = """{'year':{"$lte":'""" + \
                 str(year_end)+"""',"$gte":'"""+str(year_start)+"""'}}"""
             myquery.update(eval(myquery_str))
@@ -117,23 +104,12 @@ def processFile(request):
         if language_ != '':
             patt = re.compile('.*'+re.escape(language_)+'.*', re.IGNORECASE)
             myquery_str = """{ '$or': [ { 'language': { '$exists':False } }, { 'language':patt } ]}"""
-            # print(myquery_str)
             myquery.update(eval(myquery_str))
-            # if language_.lower()=='english':
-
-            #     myquery_str = """{ '$or': [ { 'language': { '$exists':False } }, { 'language':patt } ]}"""
-            #     print(myquery_str)
-            #     myquery.update(eval(myquery_str))
-            # else:
-            #     myquery_str = """{ 'language':patt }"""
-            #     print(myquery_str)
-            #     myquery.update(eval(myquery_str))
 
         publisher_ = request.POST.get('publisher')
         if publisher_ != '':
             patt = re.compile('.*'+re.escape(publisher_)+'.*', re.IGNORECASE)
             myquery_str = """{'$or':[{'publisher':patt  }, { 'booktitle': patt } ] }"""
-            # print(myquery_str)
             myquery.update(eval(myquery_str))
 
         zipf = zipfile.ZipFile('Output.zip', 'w', zipfile.ZIP_DEFLATED)
@@ -142,11 +118,6 @@ def processFile(request):
         content = ''
         for x in bibTexDB.find({}):
             excluding = False
-            # if title_ != '' and x['title'] != title_:
-            #    excluded += '\n' + str(x) + '\n' + 'Title not matching\n'
-
-            # print(list(x.keys()))
-
             if title_ != '':
                 patt = re.compile('.*'+re.escape(title_)+'.*', re.IGNORECASE)
 
@@ -180,8 +151,6 @@ def processFile(request):
                     continue
 
             if keywords_ != '':
-                # print(x['doi'])
-
                 temp = keywords_.strip().split(',')
                 for temp1 in temp:
                     patt = re.compile(
@@ -193,8 +162,6 @@ def processFile(request):
                         continue
 
             if language_ != '':
-                # patt = re.compile(
-                #    '.*'+re.escape(language_)+'.*', re.IGNORECASE)
                 if 'language' in x.keys():
                     # if patt.search(x['language']) != language_:
                     if language_ in x['language']:
@@ -209,12 +176,8 @@ def processFile(request):
                 flag1 = False
                 flag2 = False
                 if 'publisher' in x.keys() and patt.search(x['publisher']) != None:
-                    # if 'booktitle' in x.keys() and publisher_ in x['publisher']:
-                    # print(x['publisher'])
                     flag1 = True
                 if 'booktitle' in x.keys() and patt.search(x['booktitle']) != None:
-                    # if 'booktitle' in x.keys() and publisher_ in x['booktitle']:
-                    # print(x['booktitle'])
                     flag2 = True
                 if flag1 == True or flag2 == True:
                     pass
@@ -226,7 +189,7 @@ def processFile(request):
 
             if excluding == False:
                 content += str(x) + '\n\n'
-                '''url = 'https://scholar.google.com/scholar?lookup=0&q=' + \
+                url = 'https://scholar.google.com/scholar?lookup=0&q=' + \
                     x['_id']  # +'title:'+str(x['title'])
                 # print(url)
                 time.sleep(2)
@@ -243,7 +206,7 @@ def processFile(request):
                     with open(str(x['_id']).replace("/", "")+'.pdf', 'wb') as f:
                         f.write(response.content)
                         zipf.write(str(x['_id']).replace("/", "")+'.pdf')
-                    os.remove(str(x['_id']).replace("/", "")+'.pdf')'''
+                    os.remove(str(x['_id']).replace("/", "")+'.pdf')
 
         with open('included.txt', 'w', encoding='utf-8', errors='replace') as f:
             f.write(content)
@@ -256,9 +219,7 @@ def processFile(request):
         zipf.close()
         # send_from_directory('./', 'Output.zip', as_attachment=True)
         context = {'bibtex': bibTexDB.find(myquery)}
-        # return render(request, 'assess.html', context)
         return redirect('/assess')
-        # return FileResponse(open('Output.zip','rb'), as_attachment=True, filename='Output.zip')
     elif request.method == 'GET':
         return render(request, 'index.html')
 
@@ -306,9 +267,9 @@ def assessment(request):
                 x['Yes'] += 1
             elif request.POST.get(key) == 'No':
                 x['No'] += 1
-            if request.POST.get('r'+str(key))!='':
+            if request.POST.get('r'+str(key)) != '':
                 x['Responses'].append(request.POST.get('r'+str(key)))
             bibTexDB.update_one({'_id': key},
-                                    {'$set': x},
-                                    upsert=True)
+                                {'$set': x},
+                                upsert=True)
     return redirect('/')
