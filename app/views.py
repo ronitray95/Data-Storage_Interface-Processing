@@ -24,17 +24,18 @@ import uuid
 
 context = {}
 search_uuid = ''
-
+client = MongoClient(
+            "mongodb+srv://admin:admin123@cluster0.ajwby.mongodb.net/?retryWrites=true&w=majority")
 
 def processFile(request):
     global context
     global search_uuid
+    global client
     search_uuid = uuid.uuid4().urn[9:]
 
     if request.method == 'POST':
         parser = parseOpts(common_strings=True)
-        client = MongoClient(
-            "mongodb+srv://admin:admin123@cluster0.ajwby.mongodb.net/?retryWrites=true&w=majority")
+        
         uploaded_file = request.FILES.get('bibfile', '')
 
         try:
@@ -45,7 +46,7 @@ def processFile(request):
             print("pymongo ERROR:", err)
 
         db = client['bibtex_entries']
-        bibTexDB = db[search_uuid]
+        bibTexDB = db['bibtex']
         if uploaded_file != '':
             bib_database = parser.parse_file(file=uploaded_file, partial=True)
             for i in range(len(bib_database.entries)):
@@ -195,22 +196,19 @@ def processFile(request):
                 content += str(x) + '\n\n'
                 #break  # <--------------REMOVE THIS
                 url = 'https://scholar.google.com/scholar?lookup=0&q=' + x['_id']
-                time.sleep(2)
                 page = requests.get(url)
                 sp = bs(page.content, "html.parser")
                 #sp = sp.findAll("div", class_="gs_or_ggsm")
                 sp = sp.findAll("div", {"class": "gs_or_ggsm"})
-                for s in sp:
-                    pdd = s.find('a')['href']
+                if len(sp)>0:
+                    pdd = sp[0].find('a')['href']
                     if pdd is None:
                         continue
                     response = requests.get(pdd)
-
                     with open(str(x['_id']).replace("/", "")+'.pdf', 'wb') as f:
                         f.write(response.content)
                         zipf.write(str(x['_id']).replace("/", "")+'.pdf')
                     os.remove(str(x['_id']).replace("/", "")+'.pdf')
-                    break
 
         with open('included.txt', 'w', encoding='utf-8', errors='replace') as f:
             f.write(content)
@@ -257,8 +255,9 @@ def downloadPaper(request):
 
 
 def assessment(request):
-    client = MongoClient(
-        "mongodb+srv://admin:admin123@cluster0.ajwby.mongodb.net/?retryWrites=true&w=majority")
+    global client
+    #client = MongoClient(
+    #    "mongodb+srv://admin:admin123@cluster0.ajwby.mongodb.net/?retryWrites=true&w=majority")
     db = client['user_feedback']
     bibTexDB = db[search_uuid]
 
